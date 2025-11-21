@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 export const generateJwt = (email: string): string => {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
   const payload = Buffer.from(JSON.stringify({ 
