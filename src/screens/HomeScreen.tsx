@@ -18,6 +18,15 @@ import { RootStackParamList, User } from "../types";
 import UserHeader from "../components/UserHeader";
 import { Ionicons } from "@expo/vector-icons";
 
+const shuffleArray = <T extends any>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 const HomeScreen = () => {
@@ -28,16 +37,36 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+
   const fetchData = async () => {
     try {
       setError(null);
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
+
+      if (allUsers.length === 0) {
+        const response = await axios.get(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        setAllUsers(response.data);
+      }
+
+      const shuffled = shuffleArray(
+        allUsers.length > 0
+          ? allUsers
+          : (await axios.get("https://jsonplaceholder.typicode.com/users")).data
       );
-      setUsers(response.data);
+      const minCount = 5;
+      const maxCount = Math.min(shuffled.length, 10);
+      const randomCount =
+        Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
+
+      const randomlyFilteredUsers = shuffled.slice(0, randomCount);
+
+      setUsers(randomlyFilteredUsers as User[]);
     } catch (err) {
       setError("Gagal memuat data. Periksa koneksi internet atau API.");
       setUsers([]);
+      setAllUsers([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -87,7 +116,11 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        ListHeaderComponent={<UserHeader />}
+        ListHeaderComponent={
+          <UserHeader
+            title={`Daftar (${users.length} dari ${allUsers.length})`}
+          />
+        }
         data={users}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
