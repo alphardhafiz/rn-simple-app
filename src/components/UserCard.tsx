@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { User } from "../types";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
 
 interface UserCardProps {
   data: User;
@@ -16,26 +17,46 @@ interface UserCardProps {
 }
 
 const UserCard = ({ data, onPress, isDetail = false }: UserCardProps) => {
+  const { colors, scheme } = useTheme();
+  const isDark = scheme === "dark";
   const companyName = (data as any).company?.name;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={!onPress}
-      style={[styles.card, isDetail && styles.detailCard]}
+      style={[
+        styles.card,
+        { backgroundColor: colors.card },
+        isDetail && styles.detailCard,
+        isDetail && {
+          backgroundColor: isDark ? "#2A3A5A" : "#E0E7FF",
+          borderColor: isDark ? "#4B6CB7" : "#A3B5FF",
+        }
+      ]}
     >
-      <View style={styles.avatar}>
+      <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
         <Ionicons name="person" size={24} color="white" />
       </View>
       <View style={styles.info}>
-        <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.email}>{data.email}</Text>
+        <Text style={[styles.name, { color: colors.text }]}>
+          {data.name}
+        </Text>
+        <Text style={[styles.email, { color: colors.primary }]}>
+          {data.email}
+        </Text>
         {isDetail && companyName && (
-          <Text style={styles.company}>🏢 {companyName}</Text>
+          <Text style={[styles.company, { color: colors.subtleText }]}>
+            🏢 {companyName}
+          </Text>
         )}
       </View>
       {!isDetail && (
-        <Ionicons name="chevron-forward-outline" size={20} color="#B0B0B0" />
+        <Ionicons 
+          name="chevron-forward-outline" 
+          size={20} 
+          color={colors.subtleText} 
+        />
       )}
     </TouchableOpacity>
   );
@@ -45,7 +66,6 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     padding: 16,
-    backgroundColor: "white",
     borderRadius: 12,
     marginBottom: 12,
     alignItems: "center",
@@ -61,17 +81,14 @@ const styles = StyleSheet.create({
     }),
   },
   detailCard: {
-    backgroundColor: "#E0E7FF",
     elevation: 0,
     borderWidth: 1,
-    borderColor: "#A3B5FF",
     marginBottom: 20,
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#4B6CB7",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -80,16 +97,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#333",
   },
   email: {
     fontSize: 14,
-    color: "#4B6CB7",
     marginTop: 2,
   },
   company: {
     fontSize: 13,
-    color: "#555",
     marginTop: 4,
   },
 });

@@ -1,5 +1,9 @@
-import React, { useContext } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useContext, useMemo } from "react";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   ActivityIndicator,
@@ -10,6 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import LoginScreen from "../screens/LoginScreen";
 import { RootStackParamList } from "../types";
 import HomeScreen from "../screens/HomeScreen";
@@ -19,27 +24,49 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   const auth = useContext(AuthContext);
+  const { colors, scheme } = useTheme();
 
-  const PRIMARY_COLOR = "#4B6CB7";
-  const BACKGROUND_COLOR = "#F0F4F8";
+  const navigationTheme = useMemo(
+    () => ({
+      ...(scheme === "dark" ? DarkTheme : DefaultTheme),
+      colors: {
+        ...(scheme === "dark" ? DarkTheme.colors : DefaultTheme.colors),
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.card,
+        text: colors.text,
+        border: colors.inputBorder,
+        notification: colors.primary,
+      },
+    }),
+    [scheme, colors]
+  );
 
   if (auth?.isLoading) {
     return (
-      <View style={loadingStyles.container}>
-        <ActivityIndicator size="large" color={PRIMARY_COLOR} />
-        <Text style={loadingStyles.text}>Loading application data...</Text>
+      <View
+        style={[
+          loadingStyles.container,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[loadingStyles.text, { color: colors.subtleText }]}>
+          Loading application data...
+        </Text>
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: "white" },
-          headerTintColor: PRIMARY_COLOR,
+          headerStyle: { backgroundColor: colors.card },
+          headerTintColor: colors.primary,
           headerTitleStyle: { fontWeight: "700" },
-          contentStyle: { backgroundColor: BACKGROUND_COLOR },
+          contentStyle: { backgroundColor: colors.background },
+          animation: "fade",
         }}
       >
         {auth?.userToken == null ? (
@@ -65,7 +92,7 @@ const AppNavigator = () => {
                     <Ionicons
                       name="log-out-outline"
                       size={24}
-                      color="#DC3545"
+                      color={colors.error}
                     />
                   </TouchableOpacity>
                 ),
@@ -93,7 +120,6 @@ const loadingStyles = StyleSheet.create({
   text: {
     marginTop: 15,
     fontSize: 16,
-    color: "#666",
     fontWeight: "500",
   },
 });

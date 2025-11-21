@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import UserCard from "../components/UserCard";
 import { RootStackParamList, User } from "../types";
 import UserHeader from "../components/UserHeader";
@@ -30,7 +30,7 @@ const shuffleArray = <T extends any>(array: T[]): T[] => {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 const HomeScreen = () => {
-  const auth = useContext(AuthContext);
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,26 +84,43 @@ const HomeScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#4B6CB7" />
-        <Text style={styles.infoText}>Sedang memuat data pengguna...</Text>
+      <View
+        style={[
+          styles.container,
+          styles.center,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.infoText, { color: colors.subtleText }]}>
+          Sedang memuat data pengguna...
+        </Text>
       </View>
     );
   }
 
   if (error || users.length === 0) {
     return (
-      <View style={[styles.container, styles.center]}>
+      <View
+        style={[
+          styles.container,
+          styles.center,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <Ionicons
           name={error ? "cloud-offline-outline" : "alert-circle-outline"}
           size={50}
-          color={error ? "#DC3545" : "#FFC107"}
+          color={error ? colors.error : "#FFC107"}
           style={{ marginBottom: 15 }}
         />
-        <Text style={styles.errorText}>
+        <Text style={[styles.errorText, { color: colors.error }]}>
           {error || "Tidak ada data pengguna yang tersedia."}
         </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+        <TouchableOpacity
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
+          onPress={onRefresh}
+        >
           <Text style={styles.retryText}>
             <Ionicons name="refresh" size={16} color="white" />
             {"  "}Coba Lagi
@@ -114,7 +131,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         ListHeaderComponent={
           <UserHeader
@@ -133,7 +150,7 @@ const HomeScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#4B6CB7"
+            tintColor={colors.primary}
           />
         }
         contentContainerStyle={styles.flatListContent}
@@ -145,7 +162,6 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8",
   },
   flatListContent: {
     paddingHorizontal: 15,
@@ -159,19 +175,16 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: "#666",
     marginTop: 10,
     fontWeight: "500",
   },
   errorText: {
-    color: "#DC3545",
     fontSize: 16,
     marginBottom: 20,
     fontWeight: "600",
     textAlign: "center",
   },
   retryButton: {
-    backgroundColor: "#4B6CB7",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,

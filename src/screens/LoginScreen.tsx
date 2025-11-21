@@ -1,5 +1,3 @@
-// src/screens/LoginScreen.tsx
-
 import React, { useContext, useState } from "react";
 import {
   View,
@@ -9,41 +7,37 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Platform, // Ditambahkan untuk penyesuaian shadow
+  Platform,
 } from "react-native";
-// Library tambahan untuk Gradien (Perlu diinstal: expo install expo-linear-gradient)
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { generateJwt } from "../config/jwt";
 import { Ionicons } from "@expo/vector-icons";
 
-// Catatan: Pastikan Anda telah menginstal 'expo-linear-gradient'
-// jalankan: expo install expo-linear-gradient
-
 const LoginScreen = () => {
   const auth = useContext(AuthContext);
+  const { colors, scheme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const isDark = scheme === "dark";
+
   const handleManualLogin = () => {
-    // 💡 Validasi Input
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email))
       return Alert.alert("Validasi Gagal", "Email tidak valid.");
     if (password.length < 6)
       return Alert.alert("Validasi Gagal", "Password minimal 6 karakter.");
 
-    // 💡 JWT Generation
     const token = generateJwt(email);
     auth?.login(email, token);
   };
 
-  // 💡 Fungsi Simulasi Google Login (Aman dan Stabil)
   const handleGoogleLoginSimulation = () => {
     setIsGoogleLoading(true);
 
-    // Simulasikan delay network
     setTimeout(() => {
       const mockGoogleEmail = "google_user@gmail.com";
       const mockGoogleToken = "google-access-token-SAMPLE";
@@ -55,36 +49,55 @@ const LoginScreen = () => {
 
   const isAnyLoading = auth?.isLoading || isGoogleLoading;
 
+  const gradientColors = isDark
+    ? (["#1E1E1E", "#121212"] as [string, string])
+    : (["#4b6cb7", "#182848"] as [string, string]);
+
+  const buttonGradientColors = isDark
+    ? (["#7AB8FF", "#5574AA"] as [string, string])
+    : (["#4b6cb7", "#182848"] as [string, string]);
+
   return (
-    // Gunakan LinearGradient sebagai background utama
-    <LinearGradient
-      colors={["#4b6cb7", "#182848"]} // Gradien Biru Tua ke Biru Laut
-      style={styles.container}
-    >
+    <LinearGradient colors={gradientColors} style={styles.container}>
       {isAnyLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#FFF" />
         </View>
       )}
 
-      {/* Card Login dengan Shadow yang lebih modern */}
-      <View style={styles.card}>
-        <Ionicons name="shield-checkmark-outline" size={50} color="#4b6cb7" style={styles.iconHeader} />
-        <Text style={styles.title}>Secure Access</Text>
-        <Text style={styles.subtitle}>Welcome back! Please sign in.</Text>
+      <View style={[styles.card, { backgroundColor: colors.card }]}>
+        <Ionicons
+          name="shield-checkmark-outline"
+          size={50}
+          color={colors.primary}
+          style={styles.iconHeader}
+        />
+        <Text style={[styles.title, { color: colors.text }]}>
+          Secure Access
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.subtleText }]}>
+          Welcome back! Please sign in.
+        </Text>
 
-        {/* Input Email */}
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.inputBorder,
+            },
+          ]}
+        >
           <Ionicons
             name="mail-outline"
             size={20}
-            color="#4b6cb7" // Warna ikon lebih mencolok
+            color={colors.primary}
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Email Address"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.subtleText}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -92,35 +105,41 @@ const LoginScreen = () => {
           />
         </View>
 
-        {/* Input Password */}
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: colors.inputBackground,
+              borderColor: colors.inputBorder,
+            },
+          ]}
+        >
           <Ionicons
             name="lock-closed-outline"
             size={20}
-            color="#4b6cb7" // Warna ikon lebih mencolok
+            color={colors.primary}
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Password"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.subtleText}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
         </View>
 
-        {/* Tombol Login Manual dengan Gradien */}
         <TouchableOpacity
           onPress={handleManualLogin}
           disabled={isAnyLoading}
           style={styles.btnWrapper}
         >
           <LinearGradient
-            colors={["#4b6cb7", "#182848"]}
+            colors={buttonGradientColors}
             style={styles.btnLogin}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+            start={[0, 0]}
+            end={[1, 0]}
           >
             <Text style={styles.textWhite}>
               {auth?.isLoading ? "Loading..." : "LOGIN"}
@@ -128,26 +147,33 @@ const LoginScreen = () => {
           </LinearGradient>
         </TouchableOpacity>
 
-        <Text style={styles.dividerText}>- ATAU -</Text>
+        <Text style={[styles.dividerText, { color: colors.subtleText }]}>
+          - ATAU -
+        </Text>
 
-        {/* Tombol Login Google (Simulasi) */}
         <TouchableOpacity
-          style={styles.btnGoogle}
+          style={[
+            styles.btnGoogle,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.inputBorder,
+            },
+          ]}
           onPress={handleGoogleLoginSimulation}
           disabled={isAnyLoading}
         >
           {isGoogleLoading ? (
-            <ActivityIndicator color="#4b6cb7" />
+            <ActivityIndicator color={colors.primary} />
           ) : (
             <>
               <Ionicons
                 name="logo-google"
                 size={20}
-                color="#DB4437" // Warna Ikon Google Asli
+                color={colors.googleIcon}
                 style={styles.googleIcon}
               />
-              <Text style={styles.textGoogle}>
-                Masuk dengan Google (Simulasi)
+              <Text style={[styles.textGoogle, { color: colors.primary }]}>
+                Masuk dengan Google
               </Text>
             </>
           )}
@@ -169,16 +195,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)", // Ubah overlay agar terlihat di background gelap
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
   },
   card: {
-    backgroundColor: "white",
     padding: 30,
     borderRadius: 16,
-    // Soft Shadow untuk Android
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -197,14 +221,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "800", // Lebih tebal
+    fontWeight: "800",
     textAlign: "center",
-    color: "#333",
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 14,
-    color: "#999",
     textAlign: "center",
     marginBottom: 30,
   },
@@ -212,25 +234,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
-    backgroundColor: "#F4F7F9", // Warna latar belakang input
     borderRadius: 10,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: "#EAEAEA", // Border yang sangat tipis
   },
   inputIcon: {
     marginRight: 10,
   },
-  input: { 
-    flex: 1, 
-    height: 50, 
+  input: {
+    flex: 1,
+    height: 50,
     fontSize: 16,
-    color: "#333",
   },
   btnWrapper: {
     marginTop: 10,
     borderRadius: 10,
-    overflow: "hidden", // Memastikan gradien tidak keluar dari batas
+    overflow: "hidden",
   },
   btnLogin: {
     padding: 15,
@@ -238,40 +257,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 55,
   },
-  textWhite: { 
-    color: "white", 
-    fontWeight: "700", 
-    fontSize: 16 
+  textWhite: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 16,
   },
-  dividerText: { 
-    textAlign: "center", 
-    marginVertical: 20, 
-    color: "#C0C0C0",
+  dividerText: {
+    textAlign: "center",
+    marginVertical: 20,
     fontWeight: "600",
   },
-  btnGoogle: { 
-    backgroundColor: "white", 
-    padding: 15, 
+  btnGoogle: {
+    padding: 15,
     borderRadius: 10,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    borderWidth: 1, // Tambahkan border agar terlihat menonjol
-    borderColor: "#DDD",
+    borderWidth: 1,
     height: 55,
   },
-  googleIcon: { marginRight: 15 },
-  textGoogle: {
-    color: "#4b6cb7", // Warna teks senada dengan primary color
-    fontWeight: "600",
-    fontSize: 16
+  googleIcon: {
+    marginRight: 15,
   },
-  forgotPasswordText: {
-    textAlign: "center",
-    color: "#4b6cb7",
-    fontSize: 14,
+  textGoogle: {
     fontWeight: "600",
-  }
+    fontSize: 16,
+  },
 });
 
 export default LoginScreen;

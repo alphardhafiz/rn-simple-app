@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 interface UserHeaderProps {
   title?: string;
@@ -8,15 +9,20 @@ interface UserHeaderProps {
 
 const UserHeader = ({ title = "Selamat Datang," }: UserHeaderProps) => {
   const auth = useContext(AuthContext);
+  const { colors } = useTheme();
 
   const email = auth?.userInfo?.email || "Pengguna";
 
   return (
-    <View style={styles.header}>
-      <Text style={styles.welcome}>{title}</Text>
-      <Text style={styles.userEmail}>{email}</Text>
+    <View style={[styles.header, { backgroundColor: colors.card }]}>
+      <Text style={[styles.welcome, { color: colors.subtleText }]}>
+        {title}
+      </Text>
+      <Text style={[styles.userEmail, { color: colors.secondary }]}>
+        {email}
+      </Text>
       {auth?.userToken && (
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, { color: colors.subtleText }]}>
           Token: {auth.userToken.substring(0, 10)}...
         </Text>
       )}
@@ -27,7 +33,6 @@ const UserHeader = ({ title = "Selamat Datang," }: UserHeaderProps) => {
 const styles = StyleSheet.create({
   header: {
     padding: 20,
-    backgroundColor: "white",
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     marginBottom: 10,
@@ -44,18 +49,15 @@ const styles = StyleSheet.create({
   },
   welcome: {
     fontSize: 14,
-    color: "#999",
     fontWeight: "500",
   },
   userEmail: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#182848",
     marginTop: 2,
   },
   infoText: {
     fontSize: 12,
-    color: "#C0C0C0",
     marginTop: 8,
   },
 });
