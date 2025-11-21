@@ -1,5 +1,3 @@
-// src/screens/HomeScreen.tsx
-
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -14,8 +12,9 @@ import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthContext } from "../context/AuthContext";
-// import UserCard from "../components/UserCard";
+import UserCard from "../components/UserCard";
 import { RootStackParamList, User } from "../types";
+import UserHeader from "../components/UserHeader";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
@@ -53,16 +52,6 @@ const HomeScreen = () => {
     fetchData();
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.welcome}>Selamat Datang,</Text>
-      <Text style={styles.userEmail}>{auth?.userInfo?.email}</Text>
-      <Text style={styles.infoText}>
-        Token: {auth?.userToken?.substring(0, 10)}...
-      </Text>
-    </View>
-  );
-
   // 💡 UX/UI: Loading, Error, dan Empty State
   if (loading && !refreshing) {
     return (
@@ -85,8 +74,8 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* <FlatList
-        ListHeaderComponent={renderHeader}
+      <FlatList
+        ListHeaderComponent={<UserHeader />}
         data={users}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
@@ -100,7 +89,7 @@ const HomeScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{ padding: 20 }}
-      /> */}
+      />
     </View>
   );
 };
